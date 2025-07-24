@@ -3,6 +3,9 @@ package merkle
 import (
 	"bytes"
 	"crypto/sha256"
+	"encoding/hex"
+	"fmt"
+	"strings"
 )
 
 // Basic structure the merkle tree package will generate once consumed.
@@ -61,7 +64,6 @@ func (t *Tree) AddLeaves(datas [][]byte) {
 
 func (t *Tree) GetRoot() (Hash, string)             {}
 func (t *Tree) MakeTree()                           {}
-func (t *Tree) Display()                            {}
 func (t *Tree) CalculateNodes() []Hash              {}
 func (t *Tree) SearchLeaves(hash Hash) (int, error) {}
 
@@ -71,8 +73,30 @@ func (t *Tree) Reset() {
 	t.finalized = false
 }
 
+func (t *Tree) Display() {
+	prettyPrint(t.tree)
+}
+
+func prettyPrint(data [][]Hash) {
+	var currentLine []string
+	for x := 0; x < len(data); x++ {
+		fmt.Printf("-+ Layer(%d) \n |\n", x)
+		currentLine = []string{}
+		for y := 0; y < len(data[x]); y++ {
+			currentLine = append(
+				currentLine,
+				fmt.Sprintf(" +--> %s",
+					hex.EncodeToString(data[x][y][:]),
+				),
+			)
+		}
+		println(strings.Join(currentLine, "\n"), "\n")
+	}
+}
+
 func (t *Tree) hash(data []byte) Hash {
 	tag := sha256.Sum256([]byte(t.Tag))
+	// Hash_A(M) = SHA256(SHA256("A") || SHA256("A") || M)
 	body := bytes.Join([][]byte{tag[:], tag[:], data}, nil)
 	fpass := sha256.Sum256(body)
 	return sha256.Sum256(fpass[:])
