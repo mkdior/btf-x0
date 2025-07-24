@@ -39,3 +39,11 @@ type Tree struct {
 	// Indicator to check whether or not the merkle root has been calculated.
 	finalized bool
 }
+
+func (t *Tree) AddLeaf(data []byte)                 {}
+func (t *Tree) AddLeaves(data [][]byte)             {}
+func (t *Tree) GetRoot() (Hash, string)             {}
+func (t *Tree) MakeTree()                           {}
+func (t *Tree) Display()                            {}
+func (t *Tree) CalculateNodes() []Hash              {}
+func (t *Tree) SearchLeaves(hash Hash) (int, error) {}
