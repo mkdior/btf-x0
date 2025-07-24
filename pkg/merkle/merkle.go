@@ -1,5 +1,10 @@
 package merkle
 
+import (
+	"bytes"
+	"crypto/sha256"
+)
+
 // Basic structure the merkle tree package will generate once consumed.
 // R -> Root | H -> Hash | L -> Leaf
 // Note: Leafs are doubly hashed with their respective tags, so are the
@@ -38,12 +43,31 @@ type Tree struct {
 	leaves []Hash
 	// Indicator to check whether or not the merkle root has been calculated.
 	finalized bool
+
+	HashOpts
 }
 
-func (t *Tree) AddLeaf(data []byte)                 {}
-func (t *Tree) AddLeaves(data [][]byte)             {}
+func (t *Tree) AddLeaf(data []byte) {
+	t.finalized = false
+	t.leaves = append(t.leaves, t.hash(data))
+}
+
+func (t *Tree) AddLeaves(datas [][]byte) {
+	t.finalized = false
+	for _, data := range datas {
+		t.leaves = append(t.leaves, t.hash(data))
+	}
+}
+
 func (t *Tree) GetRoot() (Hash, string)             {}
 func (t *Tree) MakeTree()                           {}
 func (t *Tree) Display()                            {}
 func (t *Tree) CalculateNodes() []Hash              {}
 func (t *Tree) SearchLeaves(hash Hash) (int, error) {}
+
+func (t *Tree) hash(data []byte) Hash {
+	tag := sha256.Sum256([]byte(t.Tag))
+	body := bytes.Join([][]byte{tag[:], tag[:], data}, nil)
+	fpass := sha256.Sum256(body)
+	return sha256.Sum256(fpass[:])
+}
