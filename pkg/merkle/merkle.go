@@ -55,7 +55,7 @@ func (t *Tree) AddLeaf(data []byte) {
 	t.leaves = append(t.leaves, t.hash(data))
 }
 
-func (t *Tree) AddLeaves(datas [][]byte) {
+func (t *Tree) AddLeafs(datas [][]byte) {
 	t.finalized = false
 	for _, data := range datas {
 		t.leaves = append(t.leaves, t.hash(data))
@@ -71,10 +71,25 @@ func (t *Tree) GetRoot() (Hash, string, error) {
 	return root, rootHex, nil
 }
 
-func (t *Tree) MakeTree()              {}
-func (t *Tree) CalculateNodes() []Hash {}
+func (t *Tree) BuildTree() {}
 
-func (t *Tree) SearchLeaves(hash Hash) (int, error) {
+func (t *Tree) buildTree() []Hash {
+	nodes := []Hash{}
+	rootLevel := t.tree[0]
+	rootLevelCount := len(rootLevel)
+	// If we're dealing with an odd count of leafs, start duplicating...
+	if rootLevelCount%2 == 1 {
+		rootLevel = append(rootLevel, rootLevel[len(rootLevel)-1])
+	}
+	for i := 0; i < rootLevelCount; i += 2 {
+		nodes = append(
+			nodes, t.hash(append(rootLevel[i][:], rootLevel[i+1][:]...)),
+		)
+	}
+	return nodes
+}
+
+func (t *Tree) SearchLeafs(hash Hash) (int, error) {
 	for i, l := range t.leaves {
 		if hash == l {
 			return i, nil
