@@ -36,7 +36,7 @@ type Hash = [32]byte
 // Additional options to be consumed when calculating a hash.
 type HashOpts struct {
 	// Currently we support the adding of just a single tag.
-	Tag string
+	tag string
 }
 
 type Tree struct {
@@ -48,6 +48,14 @@ type Tree struct {
 	finalized bool
 
 	HashOpts
+}
+
+func New(hashTag string) *Tree {
+	return &Tree{
+		HashOpts: HashOpts{
+			tag: hashTag,
+		},
+	}
 }
 
 func (t *Tree) AddLeaf(data []byte) {
@@ -122,7 +130,7 @@ func (t *Tree) Display() {
 }
 
 func (t *Tree) hash(data []byte) Hash {
-	tag := sha256.Sum256([]byte(t.Tag))
+	tag := sha256.Sum256([]byte(t.tag))
 	// Hash_A(M) = SHA256(SHA256("A") || SHA256("A") || M)
 	body := bytes.Join([][]byte{tag[:], tag[:], data}, nil)
 	fpass := sha256.Sum256(body)
