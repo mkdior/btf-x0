@@ -71,7 +71,18 @@ func (t *Tree) GetRoot() (Hash, string, error) {
 	return root, rootHex, nil
 }
 
-func (t *Tree) BuildTree() {}
+func (t *Tree) BuildTree() {
+	t.finalized = false
+	leafCount := len(t.leaves)
+	if leafCount > 0 {
+		t.tree = [][]Hash{}
+		t.tree = prepend(t.tree, t.leaves)
+		for len(t.tree[0]) > 1 {
+			t.tree = prepend(t.tree, t.buildTree())
+		}
+	}
+	t.finalized = true
+}
 
 func (t *Tree) buildTree() []Hash {
 	nodes := []Hash{}
@@ -110,6 +121,31 @@ func (t *Tree) Display() {
 	prettyPrint(t.tree)
 }
 
+func (t *Tree) hash(data []byte) Hash {
+	tag := sha256.Sum256([]byte(t.Tag))
+	// Hash_A(M) = SHA256(SHA256("A") || SHA256("A") || M)
+	body := bytes.Join([][]byte{tag[:], tag[:], data}, nil)
+	fpass := sha256.Sum256(body)
+	return sha256.Sum256(fpass[:])
+}
+
+// We need a parent slice housing child slices full of hashes.
+// This function prepends child slices to the first index in the parent slice.
+// [
+//
+//	 < -- Insert [ hash, hash, hash, hash ]
+//		[ hash, hash, hash, hash ]
+//		[ hash, hash, hash, hash ]
+//		[ hash, hash, hash, hash ]
+//
+// ]
+func prepend(parent [][]Hash, child []Hash) [][]Hash {
+	// make child the parent so its hash slice is the first slice
+	childParent := append([][]Hash{}, child)
+	// Now when we spread the parent, we append the inner hash slices
+	return append(childParent, parent...)
+}
+
 func prettyPrint(data [][]Hash) {
 	var currentLine []string
 	for x := 0; x < len(data); x++ {
@@ -125,12 +161,4 @@ func prettyPrint(data [][]Hash) {
 		}
 		println(strings.Join(currentLine, "\n"), "\n")
 	}
-}
-
-func (t *Tree) hash(data []byte) Hash {
-	tag := sha256.Sum256([]byte(t.Tag))
-	// Hash_A(M) = SHA256(SHA256("A") || SHA256("A") || M)
-	body := bytes.Join([][]byte{tag[:], tag[:], data}, nil)
-	fpass := sha256.Sum256(body)
-	return sha256.Sum256(fpass[:])
 }
