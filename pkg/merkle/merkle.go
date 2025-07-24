@@ -71,9 +71,19 @@ func (t *Tree) GetRoot() (Hash, string, error) {
 	return root, rootHex, nil
 }
 
-func (t *Tree) MakeTree()                           {}
-func (t *Tree) CalculateNodes() []Hash              {}
-func (t *Tree) SearchLeaves(hash Hash) (int, error) {}
+func (t *Tree) MakeTree()              {}
+func (t *Tree) CalculateNodes() []Hash {}
+
+func (t *Tree) SearchLeaves(hash Hash) (int, error) {
+	for i, l := range t.leaves {
+		if hash == l {
+			return i, nil
+		}
+	}
+	return -1, fmt.Errorf(
+		"failed finding leaf with hash %s...", hex.EncodeToString(hash[:]),
+	)
+}
 
 func (t *Tree) Reset() {
 	t.tree = [][]Hash{}
