@@ -62,7 +62,15 @@ func (t *Tree) AddLeaves(datas [][]byte) {
 	}
 }
 
-func (t *Tree) GetRoot() (Hash, string)             {}
+func (t *Tree) GetRoot() (Hash, string, error) {
+	if !t.finalized || len(t.tree) == 0 || len(t.tree[0]) == 0 {
+		return Hash{}, "", fmt.Errorf("failed retrieving root...")
+	}
+	root := t.tree[0][0]
+	rootHex := hex.EncodeToString(root[:])
+	return root, rootHex, nil
+}
+
 func (t *Tree) MakeTree()                           {}
 func (t *Tree) CalculateNodes() []Hash              {}
 func (t *Tree) SearchLeaves(hash Hash) (int, error) {}
