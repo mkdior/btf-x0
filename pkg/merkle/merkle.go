@@ -65,6 +65,12 @@ func (t *Tree) Display()                            {}
 func (t *Tree) CalculateNodes() []Hash              {}
 func (t *Tree) SearchLeaves(hash Hash) (int, error) {}
 
+func (t *Tree) Reset() {
+	t.tree = [][]Hash{}
+	t.leaves = []Hash{}
+	t.finalized = false
+}
+
 func (t *Tree) hash(data []byte) Hash {
 	tag := sha256.Sum256([]byte(t.Tag))
 	body := bytes.Join([][]byte{tag[:], tag[:], data}, nil)
