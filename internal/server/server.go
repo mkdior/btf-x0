@@ -13,7 +13,7 @@ import (
 func Start() {
 	mux := http.NewServeMux()
 	server := http.Server{
-		Addr:    ":8082",
+		Addr:    "127.0.0.1:8082",
 		Handler: mux,
 	}
 	log.Print("Starting server...")
