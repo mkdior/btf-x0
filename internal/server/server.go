@@ -28,6 +28,7 @@ func Start() {
 	sig := make(chan os.Signal, 1)
 	signal.Notify(sig, syscall.SIGINT)
 	<-sig
+	log.Print("Shutting down server... gn")
 
 	ctx, _ := context.WithTimeout(context.Background(), 5*time.Second)
 	err = server.Shutdown(ctx)
