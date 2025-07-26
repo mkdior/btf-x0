@@ -8,7 +8,14 @@ import (
 	"os/signal"
 	"syscall"
 	"time"
+
+	"github.com/mkdior/btf-x0/internal/database"
+	"github.com/mkdior/btf-x0/internal/index"
 )
+
+type Server struct {
+	ui *index.UserIndex
+}
 
 func Start() {
 	mux := http.NewServeMux()
@@ -24,9 +31,12 @@ func Start() {
 		}
 	}()
 
-	mux.HandleFunc("POST /user/create", handleUserCreate)
-	mux.HandleFunc("POST /merkle/build", handleMerkleBuild)
-	mux.HandleFunc("GET /merkle/proof/generate", handleMerkleProofGenerate)
+	db := database.NewMemoryDatabase()
+	srv := Server{ui: index.NewUserIndex(db)}
+
+	mux.HandleFunc("POST /user/create", srv.handleUserCreate)
+	mux.HandleFunc("POST /merkle/build", srv.handleMerkleBuild)
+	mux.HandleFunc("GET /merkle/proof/generate", srv.handleMerkleProofGenerate)
 
 	sig := make(chan os.Signal, 2)
 	signal.Notify(sig, os.Interrupt, syscall.SIGINT)
