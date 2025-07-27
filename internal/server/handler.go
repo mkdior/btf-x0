@@ -44,11 +44,34 @@ func (s *Server) handleMerkleBuild(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "failed to encode response", http.StatusInternalServerError)
 		return
 	}
-
 }
 
 // This function, using a built tree will generate a proof for the requesting
 // user, given a known user ID.
 func (s *Server) handleMerkleProofGenerate(w http.ResponseWriter, r *http.Request) {
-	w.Write([]byte("not implemented..."))
+	var req models.MerkleProofGenerateRequest
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		http.Error(w, "invalid request", http.StatusBadRequest)
+		return
+	}
+	user, hash, err := s.ui.GetByID(req.ID)
+	if err != nil {
+		http.Error(w, "failed retrieving user", http.StatusInternalServerError)
+		return
+	}
+	proof, err := s.mt.GenerateProof(hash)
+	if err != nil {
+		http.Error(w, "failed generating proof", http.StatusInternalServerError)
+		return
+	}
+	resp := models.MerkleProofGenerateResponse{
+		Balance: user.Balance,
+		Proof:   proof,
+	}
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+	if err := json.NewEncoder(w).Encode(resp); err != nil {
+		http.Error(w, "failed to encode response", http.StatusInternalServerError)
+		return
+	}
 }
