@@ -7,7 +7,7 @@ import (
 )
 
 func TestRandomArrayToMerkle(t *testing.T) {
-	tree := merkle.New("Bitcoin_Transaction")
+	tree := merkle.New("Bitcoin_Transaction", "Bitcoin_Transaction")
 	tree.AddLeafs([][]byte{
 		[]byte("hello"),
 		[]byte("world"),
@@ -29,7 +29,7 @@ func TestRandomArrayToMerkle(t *testing.T) {
 }
 
 func TestSpecificArrayToMerkle(t *testing.T) {
-	tree := merkle.New("Bitcoin_Transaction")
+	tree := merkle.New("Bitcoin_Transaction", "Bitcoin_Transaction")
 	tree.AddLeafs([][]byte{
 		[]byte("aaa"),
 		[]byte("bbb"),

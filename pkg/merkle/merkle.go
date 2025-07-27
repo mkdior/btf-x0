@@ -34,9 +34,13 @@ import (
 type Hash = [32]byte
 
 // Additional options to be consumed when calculating a hash.
-type HashOpts struct {
-	// Currently we support the adding of just a single tag.
-	tag string
+type tag struct {
+	leaf   string
+	branch string
+}
+
+type hashSpec struct {
+	tag
 }
 
 type Tree struct {
@@ -47,27 +51,43 @@ type Tree struct {
 	// Indicator to check whether or not the merkle root has been calculated.
 	finalized bool
 
-	HashOpts
+	hashSpec
 }
 
-func New(hashTag string) *Tree {
+type tagtype string
+
+const (
+	leaf   tagtype = "leaf"
+	branch tagtype = "branch"
+)
+
+func New(leafTag, branchTag string) *Tree {
 	return &Tree{
-		HashOpts: HashOpts{
-			tag: hashTag,
+		hashSpec: hashSpec{
+			tag: tag{
+				leaf:   leafTag,
+				branch: branchTag,
+			},
 		},
 	}
 }
 
-func (t *Tree) AddLeaf(data []byte) {
+func (t *Tree) AddLeaf(data []byte) Hash {
 	t.finalized = false
-	t.leaves = append(t.leaves, t.hash(data))
+	hash := t.hash(data, leaf)
+	t.leaves = append(t.leaves, hash)
+	return hash
 }
 
-func (t *Tree) AddLeafs(datas [][]byte) {
+func (t *Tree) AddLeafs(datas [][]byte) []Hash {
 	t.finalized = false
+	hashes := make([]Hash, 0, len(datas))
 	for _, data := range datas {
-		t.leaves = append(t.leaves, t.hash(data))
+		hash := t.hash(data, leaf)
+		hashes = append(hashes, hash)
+		t.leaves = append(t.leaves, hash)
 	}
+	return hashes
 }
 
 func (t *Tree) GetRoot() (Hash, string, error) {
@@ -102,7 +122,7 @@ func (t *Tree) buildTree() []Hash {
 	}
 	for i := 0; i < rootLevelCount; i += 2 {
 		nodes = append(
-			nodes, t.hash(append(rootLevel[i][:], rootLevel[i+1][:]...)),
+			nodes, t.hash(append(rootLevel[i][:], rootLevel[i+1][:]...), branch),
 		)
 	}
 	return nodes
@@ -129,8 +149,12 @@ func (t *Tree) Display() {
 	prettyPrint(t.tree)
 }
 
-func (t *Tree) hash(data []byte) Hash {
-	tag := sha256.Sum256([]byte(t.tag))
+func (t *Tree) hash(data []byte, tt tagtype) Hash {
+	hashtag := t.hashSpec.tag.leaf
+	if tt == branch {
+		hashtag = t.hashSpec.tag.branch
+	}
+	tag := sha256.Sum256([]byte(hashtag))
 	// Hash_A(M) = SHA256(SHA256("A") || SHA256("A") || M)
 	body := bytes.Join([][]byte{tag[:], tag[:], data}, nil)
 	fpass := sha256.Sum256(body)
