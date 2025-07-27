@@ -11,10 +11,12 @@ import (
 
 	"github.com/mkdior/btf-x0/internal/database"
 	"github.com/mkdior/btf-x0/internal/index"
+	"github.com/mkdior/btf-x0/pkg/merkle"
 )
 
 type Server struct {
 	ui *index.UserIndex
+	mt *merkle.Tree
 }
 
 func Start() {
@@ -32,7 +34,10 @@ func Start() {
 	}()
 
 	db := database.NewMemoryDatabase()
-	srv := Server{ui: index.NewUserIndex(db)}
+	srv := Server{
+		ui: index.NewUserIndex(db),
+		mt: merkle.New(""),
+	}
 
 	mux.HandleFunc("POST /user/create", srv.handleUserCreate)
 	mux.HandleFunc("POST /merkle/build", srv.handleMerkleBuild)
