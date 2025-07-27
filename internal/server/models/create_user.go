@@ -11,6 +11,7 @@ type CreateUserRequest struct {
 	Data []User `json:"data"`
 }
 
+// @TODO(Hamza) - remove this dep
 func (u User) ToDomain() domain.User {
 	return domain.User{ID: u.ID, Balance: u.Balance}
 }

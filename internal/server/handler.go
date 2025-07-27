@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"net/http"
 
+	"github.com/mkdior/btf-x0/internal/models/user"
 	"github.com/mkdior/btf-x0/internal/server/models"
 )
 
@@ -17,8 +18,11 @@ func (s *Server) handleUserCreate(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "invalid request", http.StatusBadRequest)
 		return
 	}
-	for _, user := range req.Data {
-		s.ui.Set(user.ToDomain(), [32]byte{})
+	for _, u := range req.Data {
+		domainUser := u.ToDomain()
+		stringUser := user.Serialize(domainUser)
+		hash := s.mt.AddLeaf([]byte(stringUser))
+		s.ui.Set(domainUser, hash)
 	}
 	w.Write([]byte("ok"))
 }
@@ -27,7 +31,20 @@ func (s *Server) handleUserCreate(w http.ResponseWriter, r *http.Request) {
 // to be created using the first handler listed in this file. If no users are
 // added, this function will return an error. This function returns the mroot.
 func (s *Server) handleMerkleBuild(w http.ResponseWriter, r *http.Request) {
-	w.Write([]byte("not implemented..."))
+	s.mt.BuildTree()
+	_, root, err := s.mt.GetRoot()
+	if err != nil {
+		http.Error(w, "failed to generate root", http.StatusInternalServerError)
+		return
+	}
+	resp := models.MerkleBuildResponse{Root: root}
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+	if err := json.NewEncoder(w).Encode(resp); err != nil {
+		http.Error(w, "failed to encode response", http.StatusInternalServerError)
+		return
+	}
+
 }
 
 // This function, using a built tree will generate a proof for the requesting
