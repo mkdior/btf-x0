@@ -4,7 +4,7 @@
         request-merkle-proof-generate
 
 test:
-	go test ./pkg/...
+	go test ./...
 	@echo "\n"
 
 run:
