@@ -32,16 +32,17 @@ func (ui *UserIndex) Set(user model.User, hash [32]byte) error {
 	return nil
 }
 
-func (ui *UserIndex) GetByID(id int) (model.User, error) {
+func (ui *UserIndex) GetByID(id int) (model.User, [32]byte, error) {
 	hash, ok := ui.idMap[id]
 	if !ok {
-		return model.User{}, errors.New("id not indexed")
+		return model.User{}, [32]byte{}, errors.New("id not indexed")
 	}
 	data, err := ui.db.Get(hash)
 	if err != nil {
-		return model.User{}, err
+		return model.User{}, hash, err
 	}
-	return model.Deserialize(data.Value)
+	user, err := model.Deserialize(data.Value)
+	return user, hash, err
 }
 
 func (ui *UserIndex) DeleteByID(id int) error {
