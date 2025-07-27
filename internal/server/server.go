@@ -36,7 +36,7 @@ func Start() {
 	db := database.NewMemoryDatabase()
 	srv := Server{
 		ui: index.NewUserIndex(db),
-		mt: merkle.New(""),
+		mt: merkle.New("ProofOfReserve_Leaf", "ProofOfReserve_Branch"),
 	}
 
 	mux.HandleFunc("POST /user/create", srv.handleUserCreate)
