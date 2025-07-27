@@ -2,7 +2,6 @@ package index
 
 import (
 	"errors"
-	"fmt"
 
 	"github.com/mkdior/btf-x0/internal/database"
 	model "github.com/mkdior/btf-x0/internal/models/user"
@@ -28,7 +27,6 @@ func (ui *UserIndex) Set(user model.User, hash [32]byte) error {
 		return err
 	}
 	ui.idMap[user.ID] = hash
-	fmt.Println(ui.idMap)
 	return nil
 }
 
