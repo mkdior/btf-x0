@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"crypto/sha256"
 	"encoding/hex"
+	"errors"
 	"fmt"
 	"strings"
 )
@@ -137,6 +138,40 @@ func (t *Tree) SearchLeafs(hash Hash) (int, error) {
 	return -1, fmt.Errorf(
 		"failed finding leaf with hash %s...", hex.EncodeToString(hash[:]),
 	)
+}
+
+func (t *Tree) GenerateProof(hash Hash) (out []map[int]string, err error) {
+	if !t.finalized {
+		return out, errors.New("tree is not finalized!")
+	}
+	idx, err := t.SearchLeafs(hash)
+	if err != nil {
+		return out, fmt.Errorf("no leaf in tree under %s\n", hash)
+	}
+	leavesRowIdx := len(t.tree) - 1
+	proof := []map[int]string{}
+
+	for i := leavesRowIdx; i > 0; i-- {
+		currentNodeCount := len(t.tree[i])
+		if idx == currentNodeCount-1 && currentNodeCount%2 == 1 {
+			idx /= 2
+			continue
+		}
+		nodeIsRight := idx % 2
+		siblingIdx, siblingPos := 0, -1
+		if nodeIsRight == 1 {
+			siblingIdx = idx - 1
+			siblingPos = 0
+		} else {
+			siblingIdx = idx + 1
+			siblingPos = 1
+		}
+		siblingHash := hex.EncodeToString(t.tree[i][siblingIdx][:])
+		sibling := map[int]string{siblingPos: siblingHash}
+		proof = append(proof, sibling)
+		idx /= 2
+	}
+	return proof, nil
 }
 
 func (t *Tree) Reset() {
