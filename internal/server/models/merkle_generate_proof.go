@@ -1,9 +1,10 @@
 package models
 
-type MerkleProofGenerateRequest {
-
+type MerkleProofGenerateRequest struct {
+	ID int `json:"id"`
 }
 
-type MerkleProofGenerateResponse {
-
+type MerkleProofGenerateResponse struct {
+	Balance int              `json:"balance"`
+	Proof   []map[int]string `json:"proof"`
 }
