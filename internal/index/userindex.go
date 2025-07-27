@@ -46,7 +46,7 @@ func (ui *UserIndex) GetByID(id int) (model.User, [32]byte, error) {
 func (ui *UserIndex) DeleteByID(id int) error {
 	hash, ok := ui.idMap[id]
 	if !ok {
-		return nil
+		return errors.New("id not indexed")
 	}
 	if err := ui.db.Delete(hash); err != nil {
 		return err
