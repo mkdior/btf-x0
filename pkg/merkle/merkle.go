@@ -100,17 +100,18 @@ func (t *Tree) GetRoot() (Hash, string, error) {
 	return root, rootHex, nil
 }
 
-func (t *Tree) BuildTree() {
+func (t *Tree) BuildTree() error {
 	t.finalized = false
-	leafCount := len(t.leaves)
-	if leafCount > 0 {
-		t.tree = [][]Hash{}
-		t.tree = prepend(t.tree, t.leaves)
-		for len(t.tree[0]) > 1 {
-			t.tree = prepend(t.tree, t.buildTree())
-		}
+	if len(t.leaves) == 0 {
+		return errors.New("Trying to build an empty tree...")
+	}
+	t.tree = [][]Hash{}
+	t.tree = prepend(t.tree, t.leaves)
+	for len(t.tree[0]) > 1 {
+		t.tree = prepend(t.tree, t.buildTree())
 	}
 	t.finalized = true
+	return nil
 }
 
 func (t *Tree) buildTree() []Hash {
