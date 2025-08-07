@@ -190,7 +190,7 @@ func (t *Tree) hash(data []byte, tt tagtype) Hash {
 		hashtag = t.hashSpec.tag.branch
 	}
 	tag := sha256.Sum256([]byte(hashtag))
-	// Hash_A(M) = SHA256(SHA256("A") || SHA256("A") || M)
+	// Hash_A(M) = SHA256(SHA256(SHA256("A") || SHA256("A") || M))
 	body := bytes.Join([][]byte{tag[:], tag[:], data}, nil)
 	fpass := sha256.Sum256(body)
 	return sha256.Sum256(fpass[:])
