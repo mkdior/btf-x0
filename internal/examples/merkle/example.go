@@ -8,7 +8,7 @@ import (
 
 func Run() {
 	tree := merkle.New("Bitcoin_Transaction", "Bitcoin_Transaction")
-	tree.AddLeafs([][]byte{
+	tree.AddLeaves([][]byte{
 		[]byte("aaa"),
 		[]byte("bbb"),
 		[]byte("ccc"),

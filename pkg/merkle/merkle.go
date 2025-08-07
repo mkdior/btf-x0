@@ -11,7 +11,7 @@ import (
 
 // Basic structure the merkle tree package will generate once consumed.
 // R -> Root | H -> Hash | L -> Leaf
-// Note: Leafs are doubly hashed with their respective tags, so are the
+// Note: leaves are doubly hashed with their respective tags, so are the
 // intermediate nodes, even though those are listed as being hashed once
 // without their tags. Just for illustrative purposes.
 // ---------------------------------------------------------------------
@@ -80,7 +80,8 @@ func (t *Tree) AddLeaf(data []byte) Hash {
 	return hash
 }
 
-func (t *Tree) AddLeafs(datas [][]byte) []Hash {
+// TODO(Hamza) -- Check where/ how we consume the returned hash...
+func (t *Tree) AddLeaves(datas [][]byte) []Hash {
 	t.finalized = false
 	hashes := make([]Hash, 0, len(datas))
 	for _, data := range datas {
@@ -118,7 +119,7 @@ func (t *Tree) buildTree() []Hash {
 	nodes := []Hash{}
 	rootLevel := t.tree[0]
 	rootLevelCount := len(rootLevel)
-	// If we're dealing with an odd count of leafs, start duplicating...
+	// If we're dealing with an odd count of leaves, start duplicating...
 	if rootLevelCount%2 == 1 {
 		rootLevel = append(rootLevel, rootLevel[len(rootLevel)-1])
 	}
@@ -130,7 +131,7 @@ func (t *Tree) buildTree() []Hash {
 	return nodes
 }
 
-func (t *Tree) SearchLeafs(hash Hash) (int, error) {
+func (t *Tree) SearchLeaves(hash Hash) (int, error) {
 	for i, l := range t.leaves {
 		if hash == l {
 			return i, nil
@@ -145,7 +146,7 @@ func (t *Tree) GenerateProof(hash Hash) (out []map[int]string, err error) {
 	if !t.finalized {
 		return out, errors.New("tree is not finalized!")
 	}
-	idx, err := t.SearchLeafs(hash)
+	idx, err := t.SearchLeaves(hash)
 	if err != nil {
 		return out, fmt.Errorf("no leaf in tree under %s\n", hash)
 	}
